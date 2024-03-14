@@ -1,0 +1,17 @@
+service: () -> {
+    addCourse: (record {title:text; credits:nat64; description:text}) -> (variant {Ok:record {id:text; title:text; credits:nat64; students:vec text; description:text}; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    addStudent: (record {age:nat64; name:text; email:text}) -> (variant {Ok:record {id:text; age:nat64; courses:vec text; name:text; email:text}; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    deleteCourse: (text) -> (variant {Ok:text; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    deleteStudent: (text) -> (variant {Ok:text; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    enrollStudent: (text, text) -> (variant {Ok:text; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    getCourse: (text) -> (variant {Ok:record {id:text; title:text; credits:nat64; students:vec text; description:text}; Err:text}) query;
+    getCourseFees: (text) -> (vec record {id:text; studentId:text; amount:nat64; courseId:text}) query;
+    getStudent: (text) -> (variant {Ok:record {id:text; age:nat64; courses:vec text; name:text; email:text}; Err:text}) query;
+    getStudentFees: (text) -> (vec record {id:text; studentId:text; amount:nat64; courseId:text}) query;
+    getStudents: () -> (vec record {id:text; age:nat64; courses:vec text; name:text; email:text}) query;
+    payCourseFee: (text, record {studentId:text; amount:nat64; courseId:text}) -> (variant {Ok:text; Err:variant {FeePaid:text; InsufficientBalance:text; FeeNotFound:text}});
+    unenrollStudent: (text, text) -> (variant {Ok:text; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    updateCourse: (text, record {title:text; credits:nat64; description:text}) -> (variant {Ok:record {id:text; title:text; credits:nat64; students:vec text; description:text}; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+    updateCourseFee: (text, text, nat64) -> (variant {Ok:text; Err:variant {FeePaid:text; InsufficientBalance:text; FeeNotFound:text}});
+    updateStudent: (text, record {age:nat64; name:text; email:text}) -> (variant {Ok:record {id:text; age:nat64; courses:vec text; name:text; email:text}; Err:variant {OperationFailed:text; InvalidPayload:text; NotFound:text; OperationCompleted:text}});
+}
