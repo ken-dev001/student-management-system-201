@@ -9,7 +9,8 @@ const Student = Record({
     name: text,
     age: nat64,
     email: text,
-    courses: Vec(text) // List of course IDs
+    courses: Vec(text), // List of course IDs
+    balance: nat64 // Added balance field
 });
 
 const Course = Record({
@@ -81,13 +82,19 @@ export default Canister({
     // Get student by ID
     getStudent: query([text], Result(Student, text), (id) => {
         const studentOpt = studentsStorage.get(id);
-        return "Some" in studentOpt ? Ok(studentOpt.Some) : Err("Student not found");
+        return studentOpt.match({
+            Some: (student) => Ok(student),
+            None: () => Err("Student not found")
+        });
     }),
 
     // Get course by ID
     getCourse: query([text], Result(Course, text), (id) => {
         const courseOpt = coursesStorage.get(id);
-        return "Some" in courseOpt ? Ok(courseOpt.Some) : Err("Course not found");
+        return courseOpt.match({
+            Some: (course) => Ok(course),
+            None: () => Err("Course not found")
+        });
     }),
 
     // Update methods
@@ -97,7 +104,7 @@ export default Canister({
         if (typeof payload !== "object" || Object.keys(payload).length === 0) {
             return Err({ InvalidPayload: "Invalid payload" });
         }
-        const student = { id: uuidv4(), ...payload, courses: [] };
+        const student = { id: uuidv4(), ...payload, courses: [], balance: 0 }; // Added balance initialization
         studentsStorage.insert(student.id, student);
         return Ok(student);
     }),
@@ -115,15 +122,12 @@ export default Canister({
     // Enroll a student to a course
     enrollStudent: update([text, text], Result(text, Message), (studentId, courseId) => {
         const studentOpt = studentsStorage.get(studentId);
-        if ("None" in studentOpt) {
-            return Err({ NotFound: "Student not found" });
-        }
         const courseOpt = coursesStorage.get(courseId);
-        if ("None" in courseOpt) {
-            return Err({ NotFound: "Course not found" });
+        if (None.has(studentOpt) || None.has(courseOpt)) {
+            return Err({ NotFound: "Student or Course not found" });
         }
-        const student = studentOpt.Some;
-        const course = courseOpt.Some;
+        const student = studentOpt.get;
+        const course = courseOpt.get;
 
         // Check if the student is already enrolled
         if (student.courses.includes(courseId)) {
@@ -142,15 +146,12 @@ export default Canister({
     // Unenroll a student from a course
     unenrollStudent: update([text, text], Result(text, Message), (studentId, courseId) => {
         const studentOpt = studentsStorage.get(studentId);
-        if ("None" in studentOpt) {
-            return Err({ NotFound: "Student not found" });
-        }
         const courseOpt = coursesStorage.get(courseId);
-        if ("None" in courseOpt) {
-            return Err({ NotFound: "Course not found" });
+        if (None.has(studentOpt) || None.has(courseOpt)) {
+            return Err({ NotFound: "Student or Course not found" });
         }
-        const student = studentOpt.Some;
-        const course = courseOpt.Some;
+        const student = studentOpt.get;
+        const course = courseOpt.get;
 
         // Check if the student is enrolled in the course
         const courseIndex = student.courses.indexOf(courseId);
@@ -173,7 +174,7 @@ export default Canister({
     // Delete a student by ID
     deleteStudent: update([text], Result(text, Message), (id) => {
         const deletedStudentOpt = studentsStorage.remove(id);
-        if ("None" in deletedStudentOpt) {
+        if (None.has(deletedStudentOpt)) {
             return Err({ NotFound: `Student with ID ${id} not found` });
         }
         return Ok(`Student with ID ${id} deleted successfully`);
@@ -182,7 +183,7 @@ export default Canister({
     // Delete a course by ID
     deleteCourse: update([text], Result(text, Message), (id) => {
         const deletedCourseOpt = coursesStorage.remove(id);
-        if ("None" in deletedCourseOpt) {
+        if (None.has(deletedCourseOpt)) {
             return Err({ NotFound: `Course with ID ${id} not found` });
         }
         return Ok(`Course with ID ${id} deleted successfully`);
@@ -190,110 +191,102 @@ export default Canister({
 
     // Update methods
 
-// Update student information
-updateStudent: update([text, StudentPayload], Result(Student, Message), (id, payload) => {
-    const studentOpt = studentsStorage.get(id);
-    if ("None" in studentOpt) {
-        return Err({ NotFound: "Student not found" });
-    }
-    const student = studentOpt.Some;
+    // Update student information
+    updateStudent: update([text, StudentPayload], Result(Student, Message), (id, payload) => {
+        const studentOpt = studentsStorage.get(id);
+        if (None.has(studentOpt)) {
+            return Err({ NotFound: "Student not
 
-    // Update student fields
-    if (payload.name) student.name = payload.name;
-    if (payload.age) student.age = payload.age;
-    if (payload.email) student.email = payload.email;
+ found" });
+        }
+        const student = studentOpt.get;
 
-    studentsStorage.insert(id, student);
+        // Update student fields
+        if (payload.name) student.name = payload.name;
+        if (payload.age) student.age = payload.age;
+        if (payload.email) student.email = payload.email;
 
-    return Ok(student);
-}),
+        studentsStorage.insert(id, student);
 
-// Update course information
-updateCourse: update([text, CoursePayload], Result(Course, Message), (id, payload) => {
-    const courseOpt = coursesStorage.get(id);
-    if ("None" in courseOpt) {
-        return Err({ NotFound: "Course not found" });
-    }
-    const course = courseOpt.Some;
+        return Ok(student);
+    }),
 
-    // Update course fields
-    if (payload.title) course.title = payload.title;
-    if (payload.description) course.description = payload.description;
-    if (payload.credits) course.credits = payload.credits;
+    // Update course information
+    updateCourse: update([text, CoursePayload], Result(Course, Message), (id, payload) => {
+        const courseOpt = coursesStorage.get(id);
+        if (None.has(courseOpt)) {
+            return Err({ NotFound: "Course not found" });
+        }
+        const course = courseOpt.get;
 
-    coursesStorage.insert(id, course);
+        // Update course fields
+        if (payload.title) course.title = payload.title;
+        if (payload.description) course.description = payload.description;
+        if (payload.credits) course.credits = payload.credits;
 
-    return Ok(course);
-}),
+        coursesStorage.insert(id, course);
 
-// Pay course fee
-payCourseFee: update([text, FeePayload], Result(text, FeeMessage), (studentId, payload) => {
-    const studentOpt = studentsStorage.get(studentId);
-    if ("None" in studentOpt) {
-        return Err({ FeeNotFound: "Student not found" });
-    }
-    const student = studentOpt.Some;
-    
-    const courseOpt = coursesStorage.get(payload.courseId);
-    if ("None" in courseOpt) {
-        return Err({ FeeNotFound: "Course not found" });
-    }
-    const course = courseOpt.Some;
+        return Ok(course);
+    }),
 
-    const totalFee = payload.amount;
-    const studentBalance = student.balance || 0;
+    // Pay course fee
+    payCourseFee: update([text, FeePayload], Result(text, FeeMessage), (studentId, payload) => {
+        const studentOpt = studentsStorage.get(studentId);
+        const courseOpt = coursesStorage.get(payload.courseId);
+        if (None.has(studentOpt) || None.has(courseOpt)) {
+            return Err({ FeeNotFound: "Student or Course not found" });
+        }
+        const student = studentOpt.get;
+        const course = courseOpt.get;
 
-    if (studentBalance < totalFee) {
-        return Err({ InsufficientBalance: "Insufficient balance to pay the fee" });
-    }
+        const totalFee = payload.amount;
+        const studentBalance = student.balance || 0;
 
-    // Deduct fee from student's balance
-    student.balance = studentBalance - totalFee;
-    studentsStorage.insert(studentId, student);
+        if (studentBalance < totalFee) {
+            return Err({ InsufficientBalance: "Insufficient balance to pay the fee" });
+        }
 
-    // Record the fee payment
-    const fee = { id: uuidv4(), studentId, courseId: payload.courseId, amount: totalFee };
-    feesStorage.insert(fee.id, fee);
+        // Deduct fee from student's balance
+        student.balance = studentBalance - totalFee;
+        studentsStorage.insert(studentId, student);
 
-    return Ok(`Fee of ${totalFee} paid successfully for course ${payload.courseId}`);
-}),
+        // Record the fee payment
+        const fee = { id: uuidv4(), studentId, courseId: payload.courseId, amount: totalFee };
+        feesStorage.insert(fee.id, fee);
 
-// Update course fee
-updateCourseFee: update([text, text, nat64], Result(text, FeeMessage), (studentId, courseId, newFee) => {
-    const studentOpt = studentsStorage.get(studentId);
-    if ("None" in studentOpt) {
-        return Err({ FeeNotFound: "Student not found" });
-    }
-    const student = studentOpt.Some;
-    
-    const courseOpt = coursesStorage.get(courseId);
-    if ("None" in courseOpt) {
-        return Err({ FeeNotFound: "Course not found" });
-    }
-    const course = courseOpt.Some;
+        return Ok(`Fee of ${totalFee} paid successfully for course ${payload.courseId}`);
+    }),
 
-    // Find the fee associated with the provided student and course
-    const existingFee = feesStorage.values().find(fee => fee.studentId === studentId && fee.courseId === courseId);
-    if (!existingFee) {
-        return Err({ FeeNotFound: "Fee not found for the student and course" });
-    }
+    // Update course fee
+    updateCourseFee: update([text, text, nat64], Result(text, FeeMessage), (studentId, courseId, newFee) => {
+        const studentOpt = studentsStorage.get(studentId);
+        const courseOpt = coursesStorage.get(courseId);
+        if (None.has(studentOpt) || None.has(courseOpt)) {
+            return Err({ FeeNotFound: "Student or Course not found" });
+        }
 
-    // Update the fee amount
-    existingFee.amount = newFee;
-    feesStorage.insert(existingFee.id, existingFee);
+        // Find the fee associated with the provided student and course
+        const existingFee = feesStorage.values().find(fee => fee.studentId === studentId && fee.courseId === courseId);
+        if (!existingFee) {
+            return Err({ FeeNotFound: "Fee not found for the student and course" });
+        }
 
-    return Ok(`Course fee updated to ${newFee} for student ${studentId} in course ${courseId}`);
-}),
+        // Update the fee amount
+        existingFee.amount = newFee;
+        feesStorage.insert(existingFee.id, existingFee);
 
-// Get fees for a specific student
-getStudentFees: query([text], Vec(Fee), (studentId) => {
-    return feesStorage.values().filter(fee => fee.studentId === studentId);
-}),
+        return Ok(`Course fee updated to ${newFee} for student ${studentId} in course ${courseId}`);
+    }),
 
-// Get fees for a specific course
-getCourseFees: query([text], Vec(Fee), (courseId) => {
-    return feesStorage.values().filter(fee => fee.courseId === courseId);
-})
+    // Get fees for a specific student
+    getStudentFees: query([text], Vec(Fee), (studentId) => {
+        return feesStorage.values().filter(fee => fee.studentId === studentId);
+    }),
+
+    // Get fees for a specific course
+    getCourseFees: query([text], Vec(Fee), (courseId) => {
+        return feesStorage.values().filter(fee => fee.courseId === courseId);
+    })
 });
 
 // a workaround to make uuid package work with Azle
