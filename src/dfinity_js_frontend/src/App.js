@@ -5,7 +5,8 @@ import coverImg from "./assets/img/sandwich.jpg";
 import { login, logout as destroy } from "./utils/auth";
 import Cover from "./components/utils/Cover";
 import { Notification } from "./components/utils/Notifications";
-import Items from "./components/marketplace/Students";
+import Student from "./components/marketplace/Students";
+import Course from "./components/marketplace/Courses";
 
 
 const App = function AppWrapper() {
@@ -18,7 +19,8 @@ const App = function AppWrapper() {
       {isAuthenticated ? (
         <Container fluid="md">
           <main>
-            <Items />
+            <Student />
+            <Course />
           </main>
         </Container>
       ) : (
