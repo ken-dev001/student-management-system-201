@@ -13,15 +13,10 @@ const Courses = () => {
   const [courseDescription, setCourseDescription] = useState("");
   const [courseCredits, setCourseCredits] = useState(0);
 
-  const addNewCourse = async () => {
+  const addNewCourse = async (data) => {
     try {
       setLoading(true);
-      const newCourse = {
-        title: courseTitle,
-        description: courseDescription,
-        credits: courseCredits
-      };
-      await addCourse(newCourse);
+      await addCourse(data);
       toast(<NotificationSuccess text="Course added successfully." />);
       await fetchCourses();
     } catch (error) {

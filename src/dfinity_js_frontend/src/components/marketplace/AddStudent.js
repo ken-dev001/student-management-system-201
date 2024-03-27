@@ -88,7 +88,7 @@ const AddStudent = ({ save }) => {
   );
 };
 
-AddItem.propTypes = {
+AddStudent.propTypes = {
   save: PropTypes.func.isRequired,
 };
 

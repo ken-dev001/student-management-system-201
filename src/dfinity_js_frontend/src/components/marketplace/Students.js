@@ -5,6 +5,8 @@ import { Row, Button, InputGroup, Form } from "react-bootstrap";
 
 import { NotificationSuccess, NotificationError } from "../utils/Notifications";
 import { createStudent, deleteStudent, updateStudent, getStudents } from "../../utils/marketplace";
+import AddStudent from "./AddStudent";
+import StudentCard from "./StudentCard";
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -13,15 +15,12 @@ const Students = () => {
   const [studentAge, setStudentAge] = useState(0);
   const [studentEmail, setStudentEmail] = useState("");
 
-  const addNewStudent = async () => {
+  const addNewStudent = async (data) => {
     try {
       setLoading(true);
-      const newStudent = {
-        name: studentName,
-        age: studentAge,
-        email: studentEmail
-      };
-      await createStudent(newStudent);
+      const ageStr = data.age;
+      data.age = parseInt(ageStr);
+      await createStudent(data);
       toast(<NotificationSuccess text="Student added successfully." />);
       await fetchStudents();
     } catch (error) {
@@ -78,24 +77,11 @@ const Students = () => {
 
   return (
     <div>
-      <h1>Students</h1>
-      <div className="mb-3">
-        <Form.Group controlId="studentName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control type="text" placeholder="Enter student name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
-        </Form.Group>
-        <Form.Group controlId="studentAge">
-          <Form.Label>Age</Form.Label>
-          <Form.Control type="number" placeholder="Enter student age" value={studentAge} onChange={(e) => setStudentAge(e.target.value)} />
-        </Form.Group>
-        <Form.Group controlId="studentEmail">
-          <Form.Label>Email</Form.Label>
-          <Form.Control type="email" placeholder="Enter student email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} />
-        </Form.Group>
-        <Button variant="primary" onClick={addNewStudent} disabled={loading}>
-          Add Student
-        </Button>
+      <div className="d-flex justify-content-between align-items-center">
+        <h1>Students</h1>
+        <AddStudent save={addNewStudent} />
       </div>
+       
       {loading ? (
         <Loader />
       ) : (
