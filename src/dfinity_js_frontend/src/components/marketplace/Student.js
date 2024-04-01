@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { Card, Col, Badge, Stack, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { NotificationError, NotificationSuccess } from "../utils/Notifications";
-import UpdateStudent from "./UpdateStudent";
 import DeleteStudent from "./DeleteStudent";
 
 const Student = ({ student, deleteStudent }) => {
@@ -36,7 +35,6 @@ const Student = ({ student, deleteStudent }) => {
                     <Row>
                         <Col className="d-flex justify-content-center">
                             <Stack direction="horizontal" gap={3}>
-                                <UpdateStudent studentId={id} />
                                 <DeleteStudent deleteStudent={handleDeleteStudent} />
                             </Stack>
                         </Col>

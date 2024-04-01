@@ -4,7 +4,7 @@ import { Card, Button, Col, Stack, Row, Modal, Form, InputGroup} from "react-boo
 import { toast } from "react-toastify";
 
 
-const StudentCard = ({student, onDelete, onUpdate}) => {
+const StudentCard = ({student, onDelete}) => {
     const { id, name, age, email, courses } = student;
   return (
     <Card className="mb-3">
@@ -20,7 +20,6 @@ const StudentCard = ({student, onDelete, onUpdate}) => {
             Courses: {courses && courses.map((course) => course.title).join(", ")}
             </Card.Text>
             <Stack direction="horizontal" gap={3}>
-            <Button variant="primary" onClick={() => onUpdate(id)}>Update</Button>
             <Button variant="danger" onClick={() => onDelete(id)}>Delete</Button>
             </Stack>
         </Card.Body>
@@ -28,4 +27,4 @@ const StudentCard = ({student, onDelete, onUpdate}) => {
   )
 }
 
-export default StudentCard
+export default StudentCard;

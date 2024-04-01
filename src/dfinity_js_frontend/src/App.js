@@ -8,7 +8,6 @@ import { Notification } from "./components/utils/Notifications";
 import Student from "./components/marketplace/Students";
 import Course from "./components/marketplace/Courses";
 
-
 const App = function AppWrapper() {
   const isAuthenticated = window.auth.isAuthenticated;
  

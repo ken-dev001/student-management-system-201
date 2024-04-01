@@ -30,10 +30,6 @@ export async function getStudents() {
   }
 }
 
-export async function updateStudent(id, student) {
-  return window.canister.marketplace.updateStudent(id, student);
-}
-
 export async function deleteStudent(id) {
   return window.canister.marketplace.deleteStudent(id);
 }
@@ -68,18 +64,30 @@ export async function getCourses() {
   }
 }
 
-export async function updateCourse(id, course) {
-  return window.canister.marketplace.updateCourse(id, course);
-}
-
 export async function deleteCourse(id) {
   return window.canister.marketplace.deleteCourse(id);
 }
 
 // Define function for paying course fee
 
-export async function payCourseFee(studentId, courseId, amount) {
-  return window.canister.marketplace.payCourseFee(studentId, { studentId, courseId, amount });
+export async function payCourseFee(fee) {
+  return window.canister.marketplace.addCourseFee(fee);
+}
+
+export async function getStudentFees() {
+  try {
+    return await window.canister.marketplace.getStudentFees();
+  } catch (err) {
+    if (err.name === "AgentHTTPResponseError") {
+      const authClient = window.auth.client;
+      await authClient.logout();
+    }
+    return [];
+  }
+}
+
+export async function deleteFee(id) {
+  return window.canister.marketplace.deleteFee(id);
 }
 
 // Define functions for managing student enrollment in courses

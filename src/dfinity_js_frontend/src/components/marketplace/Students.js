@@ -4,7 +4,7 @@ import Loader from "../utils/Loader";
 import { Row, Button, InputGroup, Form } from "react-bootstrap";
 
 import { NotificationSuccess, NotificationError } from "../utils/Notifications";
-import { createStudent, deleteStudent, updateStudent, getStudents } from "../../utils/marketplace";
+import { createStudent, deleteStudent, getStudents } from "../../utils/marketplace";
 import AddStudent from "./AddStudent";
 import StudentCard from "./StudentCard";
 
@@ -57,20 +57,6 @@ const Students = () => {
     }
   };
 
-  const handleUpdateStudent = async (studentId, updatedStudent) => {
-    try {
-      setLoading(true);
-      await updateStudent(studentId, updatedStudent);
-      toast(<NotificationSuccess text="Student updated successfully." />);
-      await fetchStudents();
-    } catch (error) {
-      console.error("Error updating student:", error);
-      toast(<NotificationError text="Failed to update student." />);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -88,7 +74,7 @@ const Students = () => {
         <Row xs={1} md={2} lg={3} className="g-4">
           {students.map((student) => (
             <div key={student.id}>
-              <StudentCard student={student} onDelete={handleDeleteStudent} onUpdate={handleUpdateStudent} />
+              <StudentCard student={student} onDelete={handleDeleteStudent} />
             </div>
           ))}
         </Row>

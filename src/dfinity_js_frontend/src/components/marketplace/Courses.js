@@ -4,7 +4,7 @@ import Loader from "../utils/Loader";
 import { Row, Button, InputGroup, Form } from "react-bootstrap";
 
 import { NotificationSuccess, NotificationError } from "../utils/Notifications";
-import { createCourse, deleteCourse, updateCourse, getCourses } from "../../utils/marketplace";
+import { createCourse, deleteCourse, getCourses } from "../../utils/marketplace";
 import AddCourse from "./AddCourse";
 import CourseCard from "./CourseCard";
 
@@ -57,20 +57,6 @@ const Courses = () => {
         }
     };
 
-    const handleUpdateCourse = async (courseId, updatedCourse) => {
-        try {
-            setLoading(true);
-            await updateCourse(courseId, updatedCourse);
-            toast(<NotificationSuccess text="Course updated successfully." />);
-            await fetchCourses();
-        } catch (error) {
-            console.error("Error updating course:", error);
-            toast(<NotificationError text="Failed to update course." />);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
         fetchCourses();
     }, []);
@@ -88,7 +74,7 @@ const Courses = () => {
                 <Row xs={1} md={2} lg={3} className="g-4">
                     {courses.map((course) => (
                         <div key={course.id}>
-                            <CourseCard course={course} onDelete={handleDeleteCourse} onUpdate={handleUpdateCourse} />
+                            <CourseCard course={course} onDelete={handleDeleteCourse} />
                         </div>
                     ))}
                 </Row>
